@@ -2,10 +2,10 @@ import styles from '../styles/Home.module.css'
 import { useEffect, useState } from 'react'
 import detectEthereumProvider from '@metamask/detect-provider';
 import { OpenSeaPort, Network } from 'opensea-js'
-import { OrderSide } from 'opensea-js/lib/types'
 import axios from 'axios'
 
 let seaport;
+// let provider;
 
 export default function Home() {
 
@@ -13,7 +13,9 @@ export default function Home() {
     id: '',
     address: '',
     offrAddress: '',
-    startAmount: ''
+    startAmount: '',
+
+    wallet: ''
   })
 
   const [assets, setAssets] = useState([])
@@ -23,7 +25,7 @@ export default function Home() {
     setToken({ ...token, [name]: value })
   }
 
-  useEffect(async () => {
+  useEffect(() => {
 
     // axios.get('https://api.opensea.io/api/v1/collection/somnium-space/stats').then(res=>{
     //   console.log(res.data)
@@ -35,21 +37,29 @@ export default function Home() {
     // })
 
 
+    async function test() {
+      const provider = await detectEthereumProvider();
 
-    const provider = await detectEthereumProvider();
+      let account = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      console.log(account[0])
+      seaport = new OpenSeaPort(provider, {
+        networkName: Network.Main,
+        //   apiKey: YOUR_API_KEY
+      })
+    }
+    test()
 
-    let account = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    console.log(account[0])
+
     // const signature = await ethereum.request({ method: 'personal_sign', params: [ 'Hello hello', account[0] ] });
     // console.log(signature)
     // const provider = new Web3.providers.HttpProvider('https://mainnet.infura.io/v3/a0008d9d48c74632be8df0ff171d2af5')
 
-    seaport = new OpenSeaPort(provider, {
-      networkName: Network.Main,
-      //   apiKey: YOUR_API_KEY
-    })
-    const tokenn = (await seaport.api.getPaymentTokens({ symbol: 'USDC' })).tokens[0]
-    console.log(tokenn)
+    // seaport = new OpenSeaPort(provider, {
+    //   networkName: Network.Main,
+    //   //   apiKey: YOUR_API_KEY
+    // })
+    // const tokenn = (await seaport.api.getPaymentTokens({ symbol: 'USDC' })).tokens[0]
+    // console.log(tokenn)
 
 
 
@@ -77,6 +87,8 @@ export default function Home() {
 
 
   }, [])
+
+
 
 
   const getAsset = async (event) => {
@@ -107,11 +119,11 @@ export default function Home() {
   const runBot = () => {
     setAssets([])
     for (let i = 1; i < 3; i++) {
-        axios.get(`https://api.opensea.io/api/v1/asset/0x913ae503153d9a335398d0785ba60a2d63ddb4e2/${i}/`).then(res => {
-          console.log(res.data)
-          setAssets(oldArray => [...oldArray, res.data]);
-          makeOffer(res.data.asset_contract.address, res.data.token_id, token.id, '0.001')
-        })
+      axios.get(`https://api.opensea.io/api/v1/asset/0x913ae503153d9a335398d0785ba60a2d63ddb4e2/${i}/`).then(res => {
+        console.log(res.data)
+        setAssets(oldArray => [...oldArray, res.data]);
+        makeOffer(res.data.asset_contract.address, res.data.token_id, token.wallet, '0.001')
+      })
     }
   }
 
@@ -158,6 +170,13 @@ export default function Home() {
           onChange={handleInputChange}
           name='startAmount'
         />
+        <br />
+        <label>Your wallet</label>
+        <input
+          value={token.wallet}
+          onChange={handleInputChange}
+          name='wallet'
+        />
       </form>
       <button onClick={getAsset}>Get Asset</button>
       <button onClick={makeOffer}>Make Offer</button>
@@ -166,11 +185,11 @@ export default function Home() {
         {assets.map((asset) => (
 
           <div key={asset.token_id}>
-            <br/>
+            <br />
             <div>ID: {asset.token_id}</div>
             <div>{asset.asset_contract.address}</div>
             <div>{asset.name}</div>
-            <br/>
+            <br />
           </div>
 
         ))}
