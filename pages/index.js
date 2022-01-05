@@ -1,7 +1,6 @@
 import styles from '../styles/Home.module.css'
 import { useEffect, useState } from 'react'
 import detectEthereumProvider from '@metamask/detect-provider';
-import Web3 from 'web3'
 import { OpenSeaPort, Network } from 'opensea-js'
 import { OrderSide } from 'opensea-js/lib/types'
 import axios from 'axios'
@@ -111,7 +110,7 @@ export default function Home() {
         axios.get(`https://api.opensea.io/api/v1/asset/0x913ae503153d9a335398d0785ba60a2d63ddb4e2/${i}/`).then(res => {
           console.log(res.data)
           setAssets(oldArray => [...oldArray, res.data]);
-          makeOffer(res.data.asset_contract.address, res.data.token_id, '0xd345c99409430e32F03271E17033bbA489131a52', '0.001')
+          makeOffer(res.data.asset_contract.address, res.data.token_id, token.id, '0.001')
         })
     }
   }
