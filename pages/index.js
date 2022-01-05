@@ -100,8 +100,8 @@ export default function Home() {
     console.log(asset)
   }
 
-  const makeOffer = async (address = token.address, id = token.id, offrAddress = token.offrAddress, startAmount = token.startAmount) => {
-
+  const makeOfferr = async (address = token.address, id = token.id, offrAddress = token.offrAddress, startAmount = token.startAmount) => {
+    console.log(address,id,offrAddress,startAmount)
     const offer = await seaport.createBuyOrder({
 
       asset: {
@@ -116,13 +116,28 @@ export default function Home() {
     console.log(offer)
   }
 
+  const makeOffer = async () => {
+    const offer = await seaport.createBuyOrder({
+
+      asset: {
+        tokenAddress: token.address,
+        tokenId: token.id,
+      },
+      accountAddress: token.offrAddress,
+      // Value of the offer, in units of the payment token (or wrapped ETH if none is specified):
+      startAmount: token.startAmount,
+      // paymentTokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    })
+    console.log(offer)
+  }
+
   const runBot = () => {
     setAssets([])
     for (let i = 1; i < 3; i++) {
       axios.get(`https://api.opensea.io/api/v1/asset/0x913ae503153d9a335398d0785ba60a2d63ddb4e2/${i}/`).then(res => {
         console.log(res.data)
         setAssets(oldArray => [...oldArray, res.data]);
-        makeOffer(res.data.asset_contract.address, res.data.token_id, token.wallet, '0.001')
+        makeOfferr(res.data.asset_contract.address, res.data.token_id, token.wallet, '0.001')
       })
     }
   }
